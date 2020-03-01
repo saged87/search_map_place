@@ -3,6 +3,7 @@ part of search_map_place;
 class SearchMapPlaceWidget extends StatefulWidget {
   SearchMapPlaceWidget({
     @required this.apiKey,
+    @required this.textEditingController,
     this.placeholder = 'Search',
     this.icon = Icons.search,
     this.iconColor = Colors.blue,
@@ -52,12 +53,14 @@ class SearchMapPlaceWidget extends StatefulWidget {
   /// The color of the icon to show in the search box
   final Color iconColor;
 
+  final TextEditingController textEditingController;
+  
   @override
   _SearchMapPlaceWidgetState createState() => _SearchMapPlaceWidgetState();
 }
 
 class _SearchMapPlaceWidgetState extends State<SearchMapPlaceWidget> with SingleTickerProviderStateMixin {
-  TextEditingController _textEditingController = TextEditingController();
+  //TextEditingController _textEditingController = TextEditingController();
   AnimationController _animationController;
   // SearchContainer height.
   Animation _containerHeight;
@@ -106,9 +109,7 @@ class _SearchMapPlaceWidgetState extends State<SearchMapPlaceWidget> with Single
         animation: _animationController,
         builder: (context, _) {
           return Container(
-            height: _containerHeight.value,
             decoration: _containerDecoration(),
-            padding: EdgeInsets.only(left: 0, right: 0, top: 15),
             alignment: Alignment.center,
             child: Column(
               children: <Widget>[
@@ -116,11 +117,11 @@ class _SearchMapPlaceWidgetState extends State<SearchMapPlaceWidget> with Single
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: child,
                 ),
-                SizedBox(height: 10),
                 Opacity(
                   opacity: _listOpacity.value,
                   child: Column(
                     children: <Widget>[
+                      _placePredictions.length > 0 ? SizedBox(height: 10) : SizedBox.shrink(),
                       if (_placePredictions.length > 0)
                         for (var prediction in _placePredictions)
                           _placeOption(Place.fromJSON(prediction, geocode)),
@@ -140,7 +141,7 @@ class _SearchMapPlaceWidgetState extends State<SearchMapPlaceWidget> with Single
           Expanded(
             child: TextField(
               decoration: _inputStyle(),
-              controller: _textEditingController,
+              controller: this.widget.textEditingController,
               style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.04),
               onChanged: (value) => setState(() => _autocompletePlace(value)),
             ),
@@ -231,7 +232,7 @@ class _SearchMapPlaceWidgetState extends State<SearchMapPlaceWidget> with Single
     /// Will be called when a user selects one of the Place options.
 
     // Sets TextField value to be the location selected
-    _textEditingController.value = TextEditingValue(
+    this.widget.textEditingController.value = TextEditingValue(
       text: prediction.description,
       selection: TextSelection.collapsed(offset: prediction.description.length),
     );
